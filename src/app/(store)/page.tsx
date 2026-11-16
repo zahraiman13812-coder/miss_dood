@@ -1,3 +1,5 @@
+import BuyingGuide from "@/components/home/BuyingGuide";
+import LatestProducts from "@/components/home/LatestProducts";
 import CategoryGrid from "@/components/home/CategoryGrid";
 import BrandStrip from "@/components/home/BrandStrip";
 import HeroSlider from "@/components/home/HeroSlider";
@@ -8,6 +10,8 @@ export default function Home() {
       <HeroSlider />
       <BrandStrip />
       <CategoryGrid />
+      <LatestProducts />
+      <BuyingGuide />
     </main>
   );
 }
