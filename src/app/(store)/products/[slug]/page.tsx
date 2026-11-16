@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { latestProducts, productPrice } from "@/data/mock/latestProducts";
+import { productDetails } from "@/data/productDetails";
 import { categories } from "@/data/navigation";
 import ProductCard from "@/features/catalog/ProductCard";
 import ProductQuantity from "@/features/cart/ProductQuantity";
@@ -18,6 +19,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   if (!product) notFound();
 
   const categoryName = categories.find(([key]) => key === product.category)?.[1];
+  const details = productDetails[slug];
+  const specs = details?.specs ?? [];
+  const paragraphs = details?.paragraphs ?? [];
   const others = latestProducts.filter(item => item.slug !== slug);
   const family = families.find(group => group.includes(product.category)) ?? [];
   const related = [
@@ -46,6 +50,25 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </div>
         </div>
       </article>
+      {(specs.length > 0 || paragraphs.length > 0) && (
+        <div className={`mt-6 grid gap-4 ${specs.length > 0 && paragraphs.length > 0 ? "md:grid-cols-2" : ""}`}>
+          {specs.length > 0 && <section aria-labelledby="specs-title" className="rounded-2xl border border-line bg-panel p-5 sm:p-7">
+            <h2 id="specs-title" className="mb-4 text-xl font-bold text-accent">مشخصات محصول</h2>
+            <dl className="divide-y divide-line">
+              {specs.map(([label, value]) => (
+                <div key={label} className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-4 py-3 text-sm leading-7">
+                  <dt className="text-muted">{label}</dt>
+                  <dd className="text-content">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>}
+          {paragraphs.length > 0 && <section aria-labelledby="description-title" className="rounded-2xl border border-line bg-panel p-5 sm:p-7">
+            <h2 id="description-title" className="mb-4 text-xl font-bold text-accent">توضیحات محصول</h2>
+            {paragraphs.map((text, index) => <p key={index} className="my-2 leading-8 text-content">{text}</p>)}
+          </section>}
+        </div>
+      )}
       {related.length > 0 && <section className="mt-10" aria-labelledby="related-title">
         <h2 id="related-title" className="mb-5 text-xl font-bold">محصولات مرتبط</h2>
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{related.map(item =>
