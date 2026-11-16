@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { ShoppingBag } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 import { latestProducts, productPrice } from "@/data/mock/latestProducts";
 import { changeQuantity, useCart } from "@/features/cart/useCart";
 
@@ -67,11 +67,22 @@ export default function LatestProducts() {
               <h3 className="text-lg font-bold"><Link href={'/products/' + p.slug} className="after:absolute after:inset-0 after:rounded-2xl focus-visible:after:outline-2 focus-visible:after:outline-focus">{p.name}</Link></h3>
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                 <p className="font-bold text-accent">{productPrice(p.priceToman)}</p>
-                <button type="button" onClick={() => changeQuantity(p.slug, 1)} aria-label={'افزودن ' + p.name + ' به سبد خرید'}
-                  className="relative z-10 inline-flex min-h-11 items-center gap-2 rounded-full bg-accent px-4 text-sm font-bold text-on-accent hover:brightness-110">
-                  <ShoppingBag size={17}/><span>افزودن</span>
-                  {cart[p.slug] > 0 && <span>({cart[p.slug].toLocaleString("fa-IR")})</span>}
-                </button>
+                <div role="group" aria-label={`تعداد ${p.name} در سبد خرید`}
+                  className="relative z-10 inline-flex items-center gap-1 rounded-full border border-line bg-header p-1 focus-within:border-accent">
+                  <button type="button" aria-label={`افزایش تعداد ${p.name}`}
+                    onClick={() => changeQuantity(p.slug, 1)}
+                    className="grid size-11 place-items-center rounded-full bg-accent text-on-accent hover:brightness-110 motion-safe:active:scale-95">
+                    <Plus size={18} aria-hidden="true" />
+                  </button>
+                  <output aria-label={`تعداد ${p.name}`} className="min-w-7 text-center font-bold tabular-nums text-content">
+                    {(cart[p.slug] ?? 0).toLocaleString("fa-IR")}
+                  </output>
+                  <button type="button" aria-label={`کاهش تعداد ${p.name}`}
+                    disabled={!cart[p.slug]} onClick={() => changeQuantity(p.slug, -1)}
+                    className="grid size-11 place-items-center rounded-full text-accent enabled:hover:bg-panel disabled:opacity-35">
+                    <Minus size={18} aria-hidden="true" />
+                  </button>
+                </div>
               </div>
             </div>
           </li>
