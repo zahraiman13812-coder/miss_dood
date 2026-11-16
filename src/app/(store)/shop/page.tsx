@@ -3,23 +3,27 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { budgets } from "@/components/home/BudgetLinks";
 import { latestProducts } from "@/data/mock/latestProducts";
+import { brands } from "@/data/brands";
 import { categories } from "@/data/navigation";
 import ProductCard from "@/features/catalog/ProductCard";
 
 import { decorProductSlugs } from "@/data/decorProducts";
 
 const shopCategories = [...categories, ["decor", "محصولات تزئینی"] as const];
-type Params = { category?: string; q?: string; budget?: string };
+type Params = { brand?: string; category?: string; q?: string; budget?: string };
 
 export default async function ShopPage({ searchParams }: { searchParams: Promise<Params> }) {
-  const { category, q, budget } = await searchParams;
+  const { category, q, budget, brand } = await searchParams;
   const selected = shopCategories.find(([slug]) => slug === category);
   if (category && !selected) notFound();
 
+  const selectedBrand = brands.find(item => item.slug === brand);
+  if (brand && !selectedBrand) notFound();
   const range = budgets.find(b => b.key === budget);
   const query = typeof q === "string" ? q.trim() : "";
   const isDecor = category === "decor";
   const matches = latestProducts.filter(p =>
+    (!selectedBrand || selectedBrand.productSlugs.includes(p.slug)) &&
     (!selected || (isDecor ? decorProductSlugs.has(p.slug) : p.category === selected[0])) &&
     (!query || p.name.includes(query) || p.description.includes(query)) &&
     (!range || (p.priceToman !== null && p.priceToman >= range.min && p.priceToman < range.max))
@@ -28,8 +32,8 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   const visibleDecor = separateDecor ? matches.filter(p => decorProductSlugs.has(p.slug)) : [];
   const products = separateDecor ? matches.filter(p => !decorProductSlugs.has(p.slug)) : matches;
   const count = matches.length;
-  const title = selected?.[1] ?? range?.label ?? (query ? "نتایج جست‌وجو" : "همه محصولات");
-  const filterParams = { ...(query && { q: query }), ...(range && { budget: range.key }) };
+  const title = selectedBrand ? `محصولات ${selectedBrand.name}` : selected?.[1] ?? range?.label ?? (query ? "نتایج جست‌وجو" : "همه محصولات");
+  const filterParams = { ...(selectedBrand && {brand:selectedBrand.slug}), ...(query && { q: query }), ...(range && { budget: range.key }) };
   const chip = "inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 text-sm border-line bg-panel text-content hover:border-accent aria-[current=page]:border-accent aria-[current=page]:bg-accent aria-[current=page]:text-on-accent";
 
   return (
@@ -52,7 +56,8 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
             className={chip} aria-current={selected?.[0] === slug ? "page" : undefined}>{label}</Link>
         ))}
       </nav>
-      {(query || range) && <div className="mb-4 flex flex-wrap items-center gap-3 text-sm text-muted">
+      {(selectedBrand || query || range) && <div className="mb-4 flex flex-wrap items-center gap-3 text-sm text-muted">
+        {selectedBrand && <span>برند: <bdi>{selectedBrand.name}</bdi></span>}
         {query && <span>جست‌وجو: {query}</span>}{range && <span>{range.label}</span>}
         <Link className="text-accent underline" href={{pathname:"/shop", query:selected ? {category:selected[0]} : {}}}>پاک‌کردن فیلترها</Link>
       </div>}
@@ -66,7 +71,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
         </ul>
       </section>}
       {count === 0 && <section className="rounded-2xl border border-line bg-panel px-4 py-12 text-center">
-        <p>{query || range ? "محصولی با این فیلترها پیدا نشد." : "هنوز محصولی در این دسته ثبت نشده است."}</p>
+        <p>{query || range || (selectedBrand && selected) ? "محصولی با این فیلترها پیدا نشد." : selectedBrand ? "هنوز محصولی برای این برند ثبت نشده است." : "هنوز محصولی در این دسته ثبت نشده است."}</p>
         <Link href="/shop" className="mt-5 inline-block rounded-xl border border-line px-5 py-3 text-accent">مشاهده همه محصولات</Link>
       </section>}
     </main>

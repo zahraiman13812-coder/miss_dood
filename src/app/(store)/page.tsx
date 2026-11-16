@@ -9,9 +9,9 @@ export default function Home() {
   return (
     <main aria-label="صفحه اصلی">
       <HeroSlider />
-      <BrandStrip />
       <CategoryGrid />
       <LatestProducts />
+      <BrandStrip />
       <DecorDeck />
       <BuyingGuide />
     </main>
