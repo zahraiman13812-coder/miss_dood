@@ -1,0 +1,23 @@
+.window {
+  container-type: inline-size;
+  overflow: hidden;
+}
+.track {
+  display: flex;
+  width: max-content;
+  animation: drift 36s linear infinite;
+}
+.group {
+  display: flex;
+  flex: none;
+  min-width: 100cqw;
+}
+@keyframes drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .track { animation: none; width: 100%; }
+  .group { width: 100%; flex-wrap: wrap; }
+  .group[aria-hidden="true"] { display: none; }
+}
