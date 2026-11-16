@@ -1,4 +1,5 @@
 "use client";
+import { useCart } from "@/features/cart/useCart";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -17,6 +18,7 @@ function SearchForm({ focus = false }: { focus?: boolean }) {
     <button aria-label="اجرای جست‌وجو" className={action}><Search size={18}/></button></form>;
 }
 export default function Header() {
+  const count = Object.values(useCart()).reduce((sum, qty) => sum + qty, 0).toLocaleString("fa-IR");
   const path = usePathname();
   const [open, setOpen] = useState<"categories" | "search" | null>(null);
   const header = useRef<HTMLElement>(null);
@@ -48,7 +50,7 @@ export default function Header() {
         <div className="relative hidden lg:block"><button ref={searchButton} aria-label="جست‌وجو" aria-expanded={open==="search"} className={action} onClick={()=>setOpen(open==="search"?null:"search")}><Search size={21}/></button>
         {open==="search" && <div className="absolute left-0 top-full mt-2 w-80 rounded-md border border-line bg-panel p-2"><SearchForm focus/></div>}</div>
         <Link href="/login" onClick={close} className={action+" hidden px-3 lg:inline-flex"}><UserRound size={19}/>ورود کاربر</Link>
-        <Link href="/cart" onClick={close} aria-label="سبد خرید، صفر کالا" className={action+" border border-line px-2 text-accent"}><ShoppingBag size={19}/><span>۰</span></Link>
+        <Link href="/cart" onClick={close} aria-label={`سبد خرید، ${count} کالا`} className={action+" border border-line px-2 text-accent"}><ShoppingBag size={19}/><span>{count}</span></Link>
       </div>
     </div>
     <dialog ref={drawer} aria-labelledby="menu-title" className="border-e border-line bg-panel p-5 text-content" onClick={e=>{if(e.target===drawer.current && e.clientX < e.currentTarget.getBoundingClientRect().left) close();}}>
