@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail } from "lucide-react";
 import { getAuthClient, useSignedInEmail } from "@/features/auth/emailAuth";
@@ -10,10 +11,13 @@ const field = "mt-2 min-h-12 w-full rounded-xl border border-line bg-header px-4
 const primary = "min-h-12 w-full rounded-xl bg-accent px-4 font-bold text-on-accent disabled:opacity-50";
 
 export default function LoginPage() {
+  const router = useRouter();
   const signedIn = useSignedInEmail();
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<"email" | "code">("email");
+  const [demoCode,setDemoCode] = useState("");
+  const [demoDone,setDemoDone] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [wait, setWait] = useState(0);
@@ -26,7 +30,16 @@ export default function LoginPage() {
   async function run(action: "send" | "verify" | "logout") {
     if (busy) return;
     const auth = getAuthClient()?.auth;
-    if (!auth) { setMessage("سرویس ورود با ایمیل هنوز به فروشگاه متصل نشده است."); return; }
+    if (!auth) {
+      if (action === "send") {
+        const number = crypto.getRandomValues(new Uint32Array(1))[0] % 1000000;
+        setDemoCode(String(number).padStart(6,"0")); setCode(""); setMessage(""); setStep("code"); setWait(60);
+      } else if (action === "verify") {
+        if (code !== demoCode) { setMessage("کد با نمونهٔ نمایش‌داده‌شده مطابقت ندارد."); return; }
+        setDemoDone(true); setDemoCode(""); setMessage("");
+      }
+      return;
+    }
     setBusy(true);
     setMessage("");
     try {
@@ -46,6 +59,10 @@ export default function LoginPage() {
         setMessage("ایمیل خود را برای دریافت کد بررسی کنید.");
       } else {
         setStep("email"); setCode(""); setEmail(""); setWait(0);
+        if (action === "verify") {
+          const target = new URLSearchParams(window.location.search).get("next");
+          if (target && ["checkout","orders","contact"].includes(target)) router.replace("/" + target);
+        }
       }
     } catch {
       setMessage("ارتباط با سرویس ورود برقرار نشد.");
@@ -59,6 +76,11 @@ export default function LoginPage() {
     void run(step === "email" ? "send" : "verify");
   }
 
+  if (demoDone) return <main className="mx-auto w-full max-w-lg space-y-5 px-5 py-12">
+    <h1 className="text-2xl font-bold">پیش‌نمایش ورود تکمیل شد</h1>
+    <p className="text-muted">این مرحله فقط نمایش رابط کاربری بود.</p>
+    <Link href="/shop" className="text-accent">مشاهده فروشگاه</Link>
+  </main>;
   return (
     <main className="mx-auto grid w-full max-w-lg flex-1 content-center px-4 py-10">
       <section className="space-y-6 rounded-3xl border border-line bg-panel p-6 sm:p-9">
@@ -66,13 +88,14 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold">{signedIn ? "حساب کاربری" : step === "email" ? "ورود با ایمیل" : "تأیید ایمیل"}</h1>
         {signedIn ? <>
           <p dir="ltr" className="break-all text-right text-muted">{signedIn}</p>
+          <Link className="block text-accent" href="/orders">پیش‌نمایش سفارش‌ها</Link>
           <Link className="block text-accent" href="/shop">ورود به فروشگاه</Link>
           <button disabled={busy} onClick={() => run("logout")} className="text-sm underline">خروج از حساب</button>
         </> : <form onSubmit={submit} className="space-y-5">
           {step === "email" ? <label className="block">آدرس ایمیل
             <input required type="email" dir="ltr" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} className={field} placeholder="name@example.com"/>
           </label> : <>
-            <p className="text-sm text-muted">کد شش‌رقمی ارسال‌شده به <bdi>{email}</bdi> را وارد کنید.</p>
+            {demoCode ? <p className="text-sm text-muted">حالت نمایشی · کد نمونه: <bdi>{demoCode}</bdi></p> : <p className="text-sm text-muted">کد شش‌رقمی ارسال‌شده به <bdi>{email}</bdi> را وارد کنید.</p>}
             <label className="block">کد ورود
               <input autoFocus required type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} dir="ltr" value={code}
                 onChange={e => setCode(e.target.value.replace(/[۰-۹]/g, d => String(d.charCodeAt(0)-1776)).replace(/[٠-٩]/g, d => String(d.charCodeAt(0)-1632)).replace(/\D/g, ""))}
