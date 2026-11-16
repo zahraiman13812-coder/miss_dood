@@ -5,8 +5,9 @@ import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 
 const slides = [
-  { file: "ribbon", alt: "روبان طلایی با انحنای نشان میس دود در تالاری تیره" },
-  { file: "leaves", alt: "دو برگ طلایی روی لایه‌های سنگ مشکی" },
+  { file: "miss-dood-1", alt: "بنر اول مجموعهٔ مشکی‌طلایی میس دود" },
+  { file: "miss-dood-2", alt: "بنر دوم مجموعهٔ مشکی‌طلایی میس دود" },
+  { file: "miss-dood-3", alt: "بنر سوم مجموعهٔ مشکی‌طلایی میس دود" },
 ];
 const button = "grid size-11 place-items-center rounded-full hover:bg-panel hover:text-accent";
 
@@ -37,12 +38,12 @@ export default function HeroSlider() {
 
   return (
     <section aria-label="بنرهای میس دود" className="mx-auto max-w-7xl px-4 py-5 sm:px-8 sm:py-8">
-      <div className="relative isolate aspect-[4/3] overflow-hidden rounded-2xl border border-line bg-panel sm:aspect-[3/1]">
+      <div className="relative isolate aspect-video overflow-hidden rounded-2xl border border-line bg-panel">
         {slides.map((slide, i) => (
           <Image key={slide.file} src={`/images/hero/${slide.file}.webp`}
             alt={slide.alt} fill priority={i === 0} aria-hidden={index !== i}
             sizes="(min-width: 1280px) 1216px, 100vw"
-            className={`object-cover transition-opacity duration-700 motion-reduce:transition-none ${index === i ? "opacity-100" : "opacity-0"}`}
+            className={`object-contain transition-opacity duration-700 motion-reduce:transition-none ${index === i ? "opacity-100" : "opacity-0"}`}
           />
         ))}
         <div className="absolute bottom-3 start-3 flex items-center rounded-full border border-line bg-header/95 px-1 text-content">

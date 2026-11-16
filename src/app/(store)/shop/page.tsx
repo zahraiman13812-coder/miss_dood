@@ -6,11 +6,15 @@ import { latestProducts } from "@/data/mock/latestProducts";
 import { categories } from "@/data/navigation";
 import ProductCard from "@/features/catalog/ProductCard";
 
+import { decorItems } from "@/data/decor";
+import DecorPhoto from "@/features/decor/DecorPhoto";
+
+const shopCategories = [...categories, ["decor", "محصولات تزئینی"] as const];
 type Params = { category?: string; q?: string; budget?: string };
 
 export default async function ShopPage({ searchParams }: { searchParams: Promise<Params> }) {
   const { category, q, budget } = await searchParams;
-  const selected = categories.find(([slug]) => slug === category);
+  const selected = shopCategories.find(([slug]) => slug === category);
   if (category && !selected) notFound();
 
   const range = budgets.find(b => b.key === budget);
@@ -20,6 +24,11 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
     (!query || p.name.includes(query) || p.description.includes(query)) &&
     (!range || (p.priceToman !== null && p.priceToman >= range.min && p.priceToman < range.max))
   );
+  const isDecor = category === "decor";
+  const visibleDecor = (!category || isDecor) && !range
+    ? decorItems.filter(item => !query || item.name.includes(query))
+    : [];
+  const count = products.length + visibleDecor.length;
   const title = selected?.[1] ?? range?.label ?? (query ? "نتایج جست‌وجو" : "همه محصولات");
   const filterParams = { ...(query && { q: query }), ...(range && { budget: range.key }) };
   const chip = "inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 text-sm border-line bg-panel text-content hover:border-accent aria-[current=page]:border-accent aria-[current=page]:bg-accent aria-[current=page]:text-on-accent";
@@ -33,13 +42,13 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
       <header className="flex items-center justify-between gap-5 rounded-2xl border border-line bg-linear-to-l from-panel to-header px-5 py-4 sm:px-8">
         <div>
           <h1 className="text-2xl font-bold text-content sm:text-3xl">{title}</h1>
-          <p className="mt-2 text-sm text-muted">{products.length.toLocaleString("fa-IR")} محصول</p>
+          <p className="mt-2 text-sm text-muted">{count.toLocaleString("fa-IR")} محصول</p>
         </div>
-        {selected && <Image src={`/images/categories/${selected[0]}.webp`} width={96} height={96} alt="" className="size-20 object-contain sm:size-24" />}
+        {selected && !isDecor && <Image src={`/images/categories/${selected[0]}.webp`} width={96} height={96} alt="" className="size-20 object-contain sm:size-24" />}
       </header>
       <nav aria-label="انتخاب دسته‌بندی" className="my-5 flex gap-2 overflow-x-auto p-1 sm:flex-wrap">
         <Link className={chip} href={{pathname:"/shop", query:filterParams}} aria-current={!selected ? "page" : undefined}>همه دسته‌ها</Link>
-        {categories.map(([slug, label]) => (
+        {shopCategories.map(([slug, label]) => (
           <Link key={slug} href={{pathname:"/shop", query:{...filterParams, category:slug}}}
             className={chip} aria-current={selected?.[0] === slug ? "page" : undefined}>{label}</Link>
         ))}
@@ -48,9 +57,16 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
         {query && <span>جست‌وجو: {query}</span>}{range && <span>{range.label}</span>}
         <Link className="text-accent underline" href={{pathname:"/shop", query:selected ? {category:selected[0]} : {}}}>پاک‌کردن فیلترها</Link>
       </div>}
-      {products.length ? <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {products.length > 0 && <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {products.map(p => <li key={p.slug}><ProductCard product={p}/></li>)}
-      </ul> : <section className="rounded-2xl border border-line bg-panel px-4 py-12 text-center">
+      </ul>}
+      {visibleDecor.length > 0 && <section aria-label="محصولات تزئینی" className="my-6">
+        {!isDecor && <h2 className="mb-4 text-xl font-bold">محصولات تزئینی</h2>}
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {visibleDecor.map(item => <li key={item.id} className="aspect-[3/4]"><DecorPhoto item={item}/></li>)}
+        </ul>
+      </section>}
+      {count === 0 && <section className="rounded-2xl border border-line bg-panel px-4 py-12 text-center">
         <p>{query || range ? "محصولی با این فیلترها پیدا نشد." : "هنوز محصولی در این دسته ثبت نشده است."}</p>
         <Link href="/shop" className="mt-5 inline-block rounded-xl border border-line px-5 py-3 text-accent">مشاهده همه محصولات</Link>
       </section>}

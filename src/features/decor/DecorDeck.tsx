@@ -27,7 +27,7 @@ export default function DecorDeck() {
     <section aria-labelledby="decor-title" className="mx-auto max-w-7xl px-4 pb-12 sm:px-8">
       <div className="mb-4 flex items-center justify-between gap-4">
         <h2 id="decor-title" className="text-xl font-bold sm:text-2xl">کاتالوگ محصولات تزئینی</h2>
-        <Link href="/decor" className="shrink-0 rounded-full border border-line px-4 py-2 text-sm text-accent hover:border-accent">مشاهده همه</Link>
+        <Link href="/shop?category=decor" className="shrink-0 rounded-full border border-line px-4 py-2 text-sm text-accent hover:border-accent">مشاهده همه</Link>
       </div>
       <div className="overflow-hidden rounded-2xl border border-line bg-header px-7 pb-4 pt-6 sm:pt-8">
         <div className="relative isolate mx-auto aspect-[3/4] w-[230px] max-w-[85%] touch-pan-y sm:w-[304px]"
