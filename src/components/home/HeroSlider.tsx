@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
@@ -46,10 +45,6 @@ export default function HeroSlider() {
             className={`object-cover transition-opacity duration-700 motion-reduce:transition-none ${index === i ? "opacity-100" : "opacity-0"}`}
           />
         ))}
-        <div className="absolute inset-y-0 start-0 flex w-3/5 flex-col items-start justify-center gap-3 bg-linear-to-l from-header/95 via-header/70 to-header/0 px-5 sm:px-12">
-          <h1 dir="ltr" className="font-serif text-3xl tracking-wide text-accent sm:text-5xl">MISS DOOD</h1>
-          <Link href="/shop" className="rounded-full border border-accent bg-header/80 px-4 py-2 text-sm text-content hover:bg-panel">ورود به فروشگاه</Link>
-        </div>
         <div className="absolute bottom-3 start-3 flex items-center rounded-full border border-line bg-header/95 px-1 text-content">
           <button type="button" className={button} aria-label="بنر قبلی" onClick={() => move(-1)}><ChevronRight size={18}/></button>
           <span className="min-w-10 text-center text-sm text-accent" dir="ltr" aria-live={playing ? "off" : "polite"}>

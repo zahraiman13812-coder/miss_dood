@@ -2,38 +2,51 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, ShoppingBag } from "lucide-react";
+import { useRef } from "react";
 import { productPrice, type Product } from "@/data/mock/latestProducts";
 import { changeQuantity, useCart } from "@/features/cart/useCart";
 
-export default function ProductCard({ product: p }: { product: Product }) {
-  const cart = useCart();
+export default function ProductCard({ product }: { product: Product }) {
+  const quantity = useCart()[product.slug] ?? 0;
+  const addButton = useRef<HTMLButtonElement>(null);
+  const selected = quantity > 0;
+
+  function decrease() {
+    if (quantity === 1) addButton.current?.focus({ preventScroll: true });
+    changeQuantity(product.slug, -1);
+  }
+
   return (
-    <article className="relative isolate h-full overflow-hidden rounded-xl border border-line bg-panel hover:border-accent focus-within:border-accent">
-      <div className="relative grid aspect-[1.55] place-items-center overflow-hidden bg-linear-to-b from-header to-panel">
-        <Image src={p.image} alt="" width={240} height={240} className="absolute h-[80%] w-[70%] object-contain"/>
+    <article className="group relative isolate flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-panel text-content transition-colors hover:border-accent/70 focus-within:border-accent">
+      <div className="relative grid aspect-[1.85] place-items-center overflow-hidden bg-radial from-accent/15 via-panel to-header">
+        <span aria-hidden="true" className="absolute aspect-square h-4/5 rounded-full border border-accent/20" />
+        <Image src={product.image} alt="" width={320} height={240}
+          className="relative h-[83%] w-3/4 object-contain motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:-translate-y-1" />
       </div>
-      <div className="border-t border-line p-4 sm:p-5">
-        <h3 className="text-lg font-bold"><Link href={'/products/' + p.slug} className="after:absolute after:inset-0 after:rounded-2xl focus-visible:after:outline-2 focus-visible:after:outline-focus">{p.name}</Link></h3>
-        <p className="mt-1 line-clamp-2 min-h-10 text-xs leading-5 text-muted">{p.description}</p>
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-lg font-bold tabular-nums text-content">{productPrice(p.priceToman)}</p>
-          <div role="group" aria-label={`تعداد ${p.name} در سبد خرید`}
-            className="relative z-10 inline-flex items-center gap-1 rounded-full border border-line bg-header p-1 focus-within:border-accent">
-            <button type="button" aria-label={`افزایش تعداد ${p.name}`}
-              onClick={() => changeQuantity(p.slug, 1)}
-              className="grid size-11 place-items-center rounded-full bg-accent text-on-accent hover:brightness-110 motion-safe:active:scale-95">
-              <Plus size={18} aria-hidden="true" />
-            </button>
-            <output aria-label={`تعداد ${p.name}`} className="min-w-7 text-center font-bold tabular-nums text-content">
-              {(cart[p.slug] ?? 0).toLocaleString("fa-IR")}
+      <div className="flex flex-1 flex-col gap-4 border-t border-line p-4 sm:p-5">
+        <h3 className="text-lg font-bold">
+          <Link href={'/products/' + product.slug} className="after:absolute after:inset-0 after:rounded-2xl">
+            {product.name}
+          </Link>
+        </h3>
+        <p className="mt-auto text-start text-lg font-bold tabular-nums text-accent">{productPrice(product.priceToman)}</p>
+        <div role="group" aria-label={`سبد خرید، ${product.name}`}
+          className={`relative z-10 flex min-h-12 items-center rounded-xl border p-0.5 ${selected ? "justify-between border-line bg-header" : "border-accent bg-accent"}`}>
+          <button ref={addButton} type="button" onClick={() => changeQuantity(product.slug, 1)}
+            aria-label={selected ? `افزایش تعداد ${product.name}` : `افزودن ${product.name} به سبد خرید`}
+            className={`flex min-h-11 items-center justify-center gap-2 rounded-[0.6rem] bg-accent font-semibold text-on-accent hover:brightness-110 motion-safe:active:scale-[0.98] ${selected ? "w-11" : "w-full"}`}>
+            {selected ? <Plus size={18} aria-hidden="true" /> : <><ShoppingBag size={18} aria-hidden="true" />افزودن به سبد خرید</>}
+          </button>
+          {selected && <>
+            <output aria-label={`تعداد ${product.name}`} className="font-bold tabular-nums text-content">
+              {quantity.toLocaleString("fa-IR")}
             </output>
-            <button type="button" aria-label={`کاهش تعداد ${p.name}`}
-              disabled={!cart[p.slug]} onClick={() => changeQuantity(p.slug, -1)}
-              className="grid size-11 place-items-center rounded-full text-accent enabled:hover:bg-panel disabled:opacity-35">
+            <button type="button" onClick={decrease} aria-label={`کاهش تعداد ${product.name}`}
+              className="grid size-11 place-items-center rounded-lg text-accent hover:bg-panel">
               <Minus size={18} aria-hidden="true" />
             </button>
-          </div>
+          </>}
         </div>
       </div>
     </article>

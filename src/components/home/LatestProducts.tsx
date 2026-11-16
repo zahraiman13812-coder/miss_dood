@@ -55,7 +55,7 @@ export default function LatestProducts() {
       </div>
       <ul ref={track} className="flex snap-x snap-mandatory gap-4 overflow-x-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {latestProducts.map(p => (
-          <li key={p.slug} className="w-[76%] shrink-0 snap-start sm:w-[calc((100%-1rem)/2)] lg:w-[30%]">
+          <li key={p.slug} className="w-[83%] shrink-0 snap-start sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]">
             <ProductCard product={p} />
           </li>
         ))}
