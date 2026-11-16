@@ -1,0 +1,14 @@
+.leaving {
+  animation: tuck-behind 440ms ease-in-out both;
+}
+
+@keyframes tuck-behind {
+  0% { transform: none; z-index: 9; }
+  49% { transform: translateX(var(--sweep)) rotate(var(--tilt)) scale(.96); z-index: 9; }
+  50% { transform: translateX(var(--sweep)) rotate(var(--tilt)) scale(.96); z-index: 6; }
+  100% { transform: var(--landing); z-index: 6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leaving { animation-duration: 1ms; }
+}
