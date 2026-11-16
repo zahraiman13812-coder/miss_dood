@@ -1,0 +1,13 @@
+@theme {
+  --color-*: initial;
+  --color-page: #0b0b0a;
+  --color-header: #090909;
+  --color-panel: #181713;
+  --color-content: #f4efe4;
+  --color-muted: #c5beb0;
+  --color-accent: #e4bf76;
+  --color-on-accent: #20190d;
+  --color-line: #51442d;
+  --color-focus: var(--color-accent);
+  --color-overlay: rgb(0 0 0 / 65%);
+}
