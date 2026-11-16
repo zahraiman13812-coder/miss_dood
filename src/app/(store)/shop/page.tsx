@@ -6,8 +6,7 @@ import { latestProducts } from "@/data/mock/latestProducts";
 import { categories } from "@/data/navigation";
 import ProductCard from "@/features/catalog/ProductCard";
 
-import { decorItems } from "@/data/decor";
-import DecorPhoto from "@/features/decor/DecorPhoto";
+import { decorProductSlugs } from "@/data/decorProducts";
 
 const shopCategories = [...categories, ["decor", "محصولات تزئینی"] as const];
 type Params = { category?: string; q?: string; budget?: string };
@@ -19,16 +18,16 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
   const range = budgets.find(b => b.key === budget);
   const query = typeof q === "string" ? q.trim() : "";
-  const products = latestProducts.filter(p =>
-    (!selected || p.category === selected[0]) &&
+  const isDecor = category === "decor";
+  const matches = latestProducts.filter(p =>
+    (!selected || (isDecor ? decorProductSlugs.has(p.slug) : p.category === selected[0])) &&
     (!query || p.name.includes(query) || p.description.includes(query)) &&
     (!range || (p.priceToman !== null && p.priceToman >= range.min && p.priceToman < range.max))
   );
-  const isDecor = category === "decor";
-  const visibleDecor = (!category || isDecor) && !range
-    ? decorItems.filter(item => !query || item.name.includes(query))
-    : [];
-  const count = products.length + visibleDecor.length;
+  const separateDecor = !selected || isDecor;
+  const visibleDecor = separateDecor ? matches.filter(p => decorProductSlugs.has(p.slug)) : [];
+  const products = separateDecor ? matches.filter(p => !decorProductSlugs.has(p.slug)) : matches;
+  const count = matches.length;
   const title = selected?.[1] ?? range?.label ?? (query ? "نتایج جست‌وجو" : "همه محصولات");
   const filterParams = { ...(query && { q: query }), ...(range && { budget: range.key }) };
   const chip = "inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 text-sm border-line bg-panel text-content hover:border-accent aria-[current=page]:border-accent aria-[current=page]:bg-accent aria-[current=page]:text-on-accent";
@@ -62,8 +61,8 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
       </ul>}
       {visibleDecor.length > 0 && <section aria-label="محصولات تزئینی" className="my-6">
         {!isDecor && <h2 className="mb-4 text-xl font-bold">محصولات تزئینی</h2>}
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {visibleDecor.map(item => <li key={item.id} className="aspect-[3/4]"><DecorPhoto item={item}/></li>)}
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {visibleDecor.map(item => <li key={item.slug}><ProductCard product={item}/></li>)}
         </ul>
       </section>}
       {count === 0 && <section className="rounded-2xl border border-line bg-panel px-4 py-12 text-center">

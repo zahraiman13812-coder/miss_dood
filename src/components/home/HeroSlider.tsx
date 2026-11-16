@@ -38,7 +38,7 @@ export default function HeroSlider() {
 
   return (
     <section aria-label="بنرهای میس دود" className="mx-auto max-w-7xl px-4 py-5 sm:px-8 sm:py-8">
-      <div className="relative isolate aspect-video overflow-hidden rounded-2xl border border-line bg-panel">
+      <div className="relative isolate aspect-video lg:aspect-auto lg:h-[clamp(280px,30vw,380px)] overflow-hidden rounded-2xl border border-line bg-header">
         {slides.map((slide, i) => (
           <Image key={slide.file} src={`/images/hero/${slide.file}.webp`}
             alt={slide.alt} fill priority={i === 0} aria-hidden={index !== i}

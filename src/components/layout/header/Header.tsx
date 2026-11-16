@@ -1,5 +1,6 @@
 "use client";
 import { useCart } from "@/features/cart/useCart";
+import { useSignedInEmail } from "@/features/auth/emailAuth";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -18,6 +19,7 @@ function SearchForm({ focus = false }: { focus?: boolean }) {
     <button aria-label="اجرای جست‌وجو" className={action}><Search size={18}/></button></form>;
 }
 export default function Header() {
+  const accountLabel = useSignedInEmail() ? "حساب کاربری" : "ورود کاربر";
   const count = Object.values(useCart()).reduce((sum, qty) => sum + qty, 0).toLocaleString("fa-IR");
   const path = usePathname();
   const [open, setOpen] = useState<"categories" | "search" | null>(null);
@@ -49,7 +51,7 @@ export default function Header() {
       <div className="flex items-center gap-2 lg:ms-auto">
         <div className="relative hidden lg:block"><button ref={searchButton} aria-label="جست‌وجو" aria-expanded={open==="search"} className={action} onClick={()=>setOpen(open==="search"?null:"search")}><Search size={21}/></button>
         {open==="search" && <div className="absolute left-0 top-full mt-2 w-80 rounded-md border border-line bg-panel p-2"><SearchForm focus/></div>}</div>
-        <Link href="/login" onClick={close} className={action+" hidden px-3 lg:inline-flex"}><UserRound size={19}/>ورود کاربر</Link>
+        <Link href="/login" onClick={close} className={action+" hidden px-3 lg:inline-flex"}><UserRound size={19}/>{accountLabel}</Link>
         <Link href="/cart" onClick={close} aria-label={`سبد خرید، ${count} کالا`} className={action+" border border-line px-2 text-accent"}><ShoppingBag size={19}/><span>{count}</span></Link>
       </div>
     </div>
@@ -57,7 +59,7 @@ export default function Header() {
       <div className="mb-5 flex items-center justify-between"><strong id="menu-title" className="text-accent">منوی فروشگاه</strong><button className={action} onClick={close} aria-label="بستن منو"><X/></button></div>
       <SearchForm/><nav aria-label="منوی موبایل" className="mt-5 flex flex-col gap-2">
         <details className="border-b border-line pb-2"><summary className="py-3 text-accent">دسته‌بندی کالا</summary><CategoryLinks close={close}/></details>
-        {navLinks}<Link href="/login" onClick={close} className="flex items-center gap-2 py-3"><UserRound size={18}/>ورود کاربر</Link>
+        {navLinks}<Link href="/login" onClick={close} className="flex items-center gap-2 py-3"><UserRound size={18}/>{accountLabel}</Link>
       </nav>
     </dialog>
   </header>;
