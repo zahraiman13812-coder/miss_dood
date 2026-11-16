@@ -1,3 +1,4 @@
+import BudgetLinks from "@/components/home/BudgetLinks";
 import BuyingGuide from "@/components/home/BuyingGuide";
 import LatestProducts from "@/components/home/LatestProducts";
 import CategoryGrid from "@/components/home/CategoryGrid";
@@ -11,6 +12,7 @@ export default function Home() {
       <BrandStrip />
       <CategoryGrid />
       <LatestProducts />
+      <BudgetLinks />
       <BuyingGuide />
     </main>
   );

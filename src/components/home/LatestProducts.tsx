@@ -1,15 +1,12 @@
 "use client";
 
-import Image from "next/image";
+import ProductCard from "@/features/catalog/ProductCard";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { Minus, Plus } from "lucide-react";
-import { latestProducts, productPrice } from "@/data/mock/latestProducts";
-import { changeQuantity, useCart } from "@/features/cart/useCart";
+import { latestProducts } from "@/data/mock/latestProducts";
 
 export default function LatestProducts() {
   const track = useRef<HTMLUListElement>(null);
-  const cart = useCart();
 
   useEffect(() => {
     const list = track.current;
@@ -58,33 +55,8 @@ export default function LatestProducts() {
       </div>
       <ul ref={track} className="flex snap-x snap-mandatory gap-4 overflow-x-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {latestProducts.map(p => (
-          <li key={p.slug} className="relative isolate w-[83%] shrink-0 snap-start rounded-2xl border border-line bg-panel hover:border-accent sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]">
-            <div className="relative grid aspect-[1.9] place-items-center overflow-hidden rounded-t-2xl bg-radial from-accent/20 via-panel to-header">
-              <span aria-hidden="true" className="absolute aspect-square h-4/5 rounded-full border border-accent/20" />
-              <Image src={p.image} alt="" width={240} height={240} className="absolute h-[80%] w-[70%] object-contain"/>
-            </div>
-            <div className="border-t border-line p-4 sm:p-5">
-              <h3 className="text-lg font-bold"><Link href={'/products/' + p.slug} className="after:absolute after:inset-0 after:rounded-2xl focus-visible:after:outline-2 focus-visible:after:outline-focus">{p.name}</Link></h3>
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                <p className="font-bold text-accent">{productPrice(p.priceToman)}</p>
-                <div role="group" aria-label={`تعداد ${p.name} در سبد خرید`}
-                  className="relative z-10 inline-flex items-center gap-1 rounded-full border border-line bg-header p-1 focus-within:border-accent">
-                  <button type="button" aria-label={`افزایش تعداد ${p.name}`}
-                    onClick={() => changeQuantity(p.slug, 1)}
-                    className="grid size-11 place-items-center rounded-full bg-accent text-on-accent hover:brightness-110 motion-safe:active:scale-95">
-                    <Plus size={18} aria-hidden="true" />
-                  </button>
-                  <output aria-label={`تعداد ${p.name}`} className="min-w-7 text-center font-bold tabular-nums text-content">
-                    {(cart[p.slug] ?? 0).toLocaleString("fa-IR")}
-                  </output>
-                  <button type="button" aria-label={`کاهش تعداد ${p.name}`}
-                    disabled={!cart[p.slug]} onClick={() => changeQuantity(p.slug, -1)}
-                    className="grid size-11 place-items-center rounded-full text-accent enabled:hover:bg-panel disabled:opacity-35">
-                    <Minus size={18} aria-hidden="true" />
-                  </button>
-                </div>
-              </div>
-            </div>
+          <li key={p.slug} className="w-[76%] shrink-0 snap-start sm:w-[calc((100%-1rem)/2)] lg:w-[30%]">
+            <ProductCard product={p} />
           </li>
         ))}
       </ul>
