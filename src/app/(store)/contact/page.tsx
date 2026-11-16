@@ -11,7 +11,7 @@ export default function ContactPage() {
     <div className="space-y-2 rounded-2xl border border-line bg-panel p-6">
       <h2 className="font-bold text-accent">نشانی فروشگاه</h2>
       <address className="not-italic leading-8">{storeContact.address}</address>
-      {storeContact.phone && <a href={dialLink(storeContact.phone)} className="text-accent"><bdi>{storeContact.phone}</bdi></a>}
+      {storeContact.phones.filter(Boolean).map(phone => <a key={phone} href={dialLink(phone)} className="block text-accent"><bdi>{phone}</bdi></a>)}
     </div>
     <form className="space-y-4" onSubmit={e=>{e.preventDefault();setPreview(true);}}>
       <label className="block">پیام شما<textarea required minLength={5} maxLength={2000} rows={4} value={message} onChange={e=>{setMessage(e.target.value);setPreview(false);}} className="mt-2 block w-full rounded-xl border border-line bg-panel p-4"/></label>

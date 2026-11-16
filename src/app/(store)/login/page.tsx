@@ -1,115 +1,77 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import type { FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useState, type FormEvent } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { Mail } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { getAuthClient, useSignedInEmail } from "@/features/auth/emailAuth";
+import PasswordField, {inputClass, primaryClass} from "@/features/auth/PasswordField";
 
-const field = "mt-2 min-h-12 w-full rounded-xl border border-line bg-header px-4 text-content focus:border-accent";
-const primary = "min-h-12 w-full rounded-xl bg-accent px-4 font-bold text-on-accent disabled:opacity-50";
-
+type Mode = "login" | "signup" | "forgot";
 export default function LoginPage() {
   const router = useRouter();
   const signedIn = useSignedInEmail();
-  const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [step, setStep] = useState<"email" | "code">("email");
-  const [demoCode,setDemoCode] = useState("");
-  const [demoDone,setDemoDone] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
-  const [wait, setWait] = useState(0);
-  useEffect(() => {
-    if (wait <= 0) return;
-    const timer = setTimeout(() => setWait(wait - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [wait]);
-
-  async function run(action: "send" | "verify" | "logout") {
+  const [mode,setMode] = useState<Mode>("login");
+  const [busy,setBusy] = useState(false);
+  const [message,setMessage] = useState("");
+  function switchMode(value: Mode) { setMode(value); setMessage(""); }
+  async function submit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     if (busy) return;
+    const fields = new FormData(e.currentTarget);
+    const read = (key:string) => String(fields.get(key) ?? "");
+    const email = read("email").trim(), password = read("password");
+    const fullName = read("name").trim();
+    if (mode === "signup" && (!fullName || password !== read("confirm"))) {
+      setMessage(!fullName ? "نام و نام خانوادگی را وارد کنید." : "تکرار رمز با رمز عبور یکسان نیست."); return;
+    }
     const auth = getAuthClient()?.auth;
     if (!auth) {
-      if (action === "send") {
-        const number = crypto.getRandomValues(new Uint32Array(1))[0] % 1000000;
-        setDemoCode(String(number).padStart(6,"0")); setCode(""); setMessage(""); setStep("code"); setWait(60);
-      } else if (action === "verify") {
-        if (code !== demoCode) { setMessage("کد با نمونهٔ نمایش‌داده‌شده مطابقت ندارد."); return; }
-        setDemoDone(true); setDemoCode(""); setMessage("");
-      }
-      return;
+      setMessage("این نسخه در حالت نمایش است. برای دیدن محیط کاربر، پیش‌نمایش پنل را باز کنید."); return;
     }
-    setBusy(true);
-    setMessage("");
+    setBusy(true); setMessage("");
     try {
-      const address = email.trim();
-      const result = action === "send"
-        ? await auth.signInWithOtp({ email: address })
-        : action === "verify"
-          ? await auth.verifyOtp({ email: address, token: code, type: "email" })
-          : await auth.signOut({scope:"local"});
-      if (result.error) {
-        setMessage(result.error.status === 429 ? "درخواست‌ها زیاد است. کمی بعد دوباره تلاش کنید." :
-          action === "verify" ? "کد اشتباه است یا اعتبار آن تمام شده است." : "درخواست انجام نشد. دوباره تلاش کنید.");
-        return;
-      }
-      if (action === "send") {
-        setStep("code"); setCode(""); setWait(60);
-        setMessage("ایمیل خود را برای دریافت کد بررسی کنید.");
+      if (mode === "forgot") {
+        const {error} = await auth.resetPasswordForEmail(email,{redirectTo:location.origin+"/login/reset"});
+        if (error) throw error;
+        setMessage("اگر حسابی با این ایمیل وجود داشته باشد، لینک بازیابی را دریافت می‌کنید.");
+      } else if (mode === "signup") {
+        const {data,error} = await auth.signUp({email,password,options:{data:{full_name:fullName},emailRedirectTo:location.origin+"/account"}});
+        if (error) throw error;
+        if (data.session) router.replace("/account");
+        else setMessage("برای ادامهٔ ثبت‌نام، ایمیل خود را بررسی کنید.");
       } else {
-        setStep("email"); setCode(""); setEmail(""); setWait(0);
-        if (action === "verify") {
-          const target = new URLSearchParams(window.location.search).get("next");
-          if (target && ["checkout","orders","contact"].includes(target)) router.replace("/" + target);
-        }
+        const {error} = await auth.signInWithPassword({email,password});
+        if (error) throw error;
+        router.replace("/account");
       }
-    } catch {
-      setMessage("ارتباط با سرویس ورود برقرار نشد.");
-    } finally {
-      setBusy(false);
-    }
+    } catch {setMessage(mode === "login" ? "ورود انجام نشد. ایمیل، رمز عبور و اتصال را بررسی کنید." : "درخواست انجام نشد. دوباره تلاش کنید.");}
+    finally {setBusy(false);}
   }
 
-  function submit(e: FormEvent) {
-    e.preventDefault();
-    void run(step === "email" ? "send" : "verify");
-  }
-
-  if (demoDone) return <main className="mx-auto w-full max-w-lg space-y-5 px-5 py-12">
-    <h1 className="text-2xl font-bold">پیش‌نمایش ورود تکمیل شد</h1>
-    <p className="text-muted">این مرحله فقط نمایش رابط کاربری بود.</p>
-    <Link href="/shop" className="text-accent">مشاهده فروشگاه</Link>
+  return <main className="mx-auto grid w-full max-w-4xl flex-1 place-content-center px-4 py-10">
+    <section className="grid w-full overflow-hidden rounded-3xl border border-line bg-panel md:grid-cols-[14rem_minmax(22rem,1fr)]">
+      <div className="grid place-items-center bg-radial from-panel to-header p-4 md:p-8">
+        <Image src="/brand/miss-dood-logo.jpg" width={208} height={208} alt="MISS DOOD" className="size-20 rounded-full object-contain md:size-40"/>
+      </div>
+      <div className="min-w-0 space-y-5 p-5 sm:p-8">
+        <h1 className="text-2xl font-bold">{mode === "forgot" ? "بازیابی رمز عبور" : "حساب کاربری میس دود"}</h1>
+        {signedIn ? <Link className="block text-accent" href="/account">ورود به پنل کاربری</Link> : <>
+          <div className="grid grid-cols-2 gap-1 rounded-xl border border-line bg-header p-1">
+            {(["login","signup"] as const).map(m=><button key={m} type="button" disabled={busy} aria-pressed={mode===m}
+              className="rounded-lg py-2.5 text-muted aria-pressed:bg-accent aria-pressed:text-on-accent" onClick={()=>switchMode(m)}>{m==="login" ? "ورود" : "ثبت‌نام"}</button>)}
+          </div>
+          <form key={mode} onSubmit={submit} className="space-y-4">
+            {mode==="signup" && <label className="block">نام و نام خانوادگی<input required name="name" autoComplete="name" maxLength={120} className={inputClass}/></label>}
+            <label className="block">ایمیل<input required name="email" type="email" dir="ltr" autoComplete="email" className={inputClass}/></label>
+            {mode!=="forgot" && <PasswordField label={mode==="signup" ? "رمز عبور (حداقل ۸ نویسه)" : "رمز عبور"} name="password" fresh={mode==="signup"}/>}
+            {mode==="signup" && <PasswordField label="تکرار رمز عبور" name="confirm" fresh/>}
+            {mode==="login" && <button type="button" className="text-sm text-accent" disabled={busy} onClick={()=>switchMode("forgot")}>رمز عبورم را فراموش کرده‌ام</button>}
+            <button disabled={busy} className={primaryClass}>{busy ? "در حال بررسی…" : mode==="login" ? "ورود به حساب" : mode==="signup" ? "ساخت حساب" : "ارسال لینک بازیابی"}</button>
+          </form>
+          {!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ? <Link href="/account?preview=1" className="block text-center text-sm text-accent">مشاهدهٔ پیش‌نمایش پنل</Link> : null}
+        </>}
+        <p role="status" className="text-sm text-muted empty:hidden">{message}</p>
+      </div>
+    </section>
   </main>;
-  return (
-    <main className="mx-auto grid w-full max-w-lg flex-1 content-center px-4 py-10">
-      <section className="space-y-6 rounded-3xl border border-line bg-panel p-6 sm:p-9">
-        <Mail aria-hidden="true" className="size-8 text-accent"/>
-        <h1 className="text-2xl font-bold">{signedIn ? "حساب کاربری" : step === "email" ? "ورود با ایمیل" : "تأیید ایمیل"}</h1>
-        {signedIn ? <>
-          <p dir="ltr" className="break-all text-right text-muted">{signedIn}</p>
-          <Link className="block text-accent" href="/orders">پیش‌نمایش سفارش‌ها</Link>
-          <Link className="block text-accent" href="/shop">ورود به فروشگاه</Link>
-          <button disabled={busy} onClick={() => run("logout")} className="text-sm underline">خروج از حساب</button>
-        </> : <form onSubmit={submit} className="space-y-5">
-          {step === "email" ? <label className="block">آدرس ایمیل
-            <input required type="email" dir="ltr" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} className={field} placeholder="name@example.com"/>
-          </label> : <>
-            {demoCode ? <p className="text-sm text-muted">حالت نمایشی · کد نمونه: <bdi>{demoCode}</bdi></p> : <p className="text-sm text-muted">کد شش‌رقمی ارسال‌شده به <bdi>{email}</bdi> را وارد کنید.</p>}
-            <label className="block">کد ورود
-              <input autoFocus required type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} dir="ltr" value={code}
-                onChange={e => setCode(e.target.value.replace(/[۰-۹]/g, d => String(d.charCodeAt(0)-1776)).replace(/[٠-٩]/g, d => String(d.charCodeAt(0)-1632)).replace(/\D/g, ""))}
-                className={field+" text-center text-xl tracking-[0.4em]"} />
-            </label>
-          </>}
-          <button disabled={busy || (step === "code" && code.length !== 6)} className={primary}>{busy ? "در حال بررسی…" : step === "email" ? "ارسال کد ورود" : "تأیید و ورود"}</button>
-          {step === "code" && <div className="flex justify-between gap-3 text-sm text-accent">
-            <button type="button" disabled={busy || wait > 0} onClick={() => run("send")}>{wait ? `ارسال مجدد پس از ${wait.toLocaleString("fa-IR")} ثانیه` : "ارسال مجدد کد"}</button>
-            <button type="button" disabled={busy} onClick={() => {setStep("email");setCode("");setMessage("");}}>ویرایش ایمیل</button>
-          </div>}
-        </form>}
-        <p role="status" className="empty:hidden text-sm text-muted">{message}</p>
-      </section>
-    </main>
-  );
 }

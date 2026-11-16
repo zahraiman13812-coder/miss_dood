@@ -22,12 +22,12 @@ export default function Footer() {
           <h2 className="mb-2 font-bold text-accent">ارتباط با میس دود</h2>
           <Link href="/about" className={linkStyle}>دربارهٔ ما</Link>
           <Link href="/contact" className={linkStyle}>تماس با ما</Link>
-          {(storeContact.phone || storeContact.address) && (
+          {(storeContact.phones.some(Boolean) || storeContact.address) && (
             <address className="mt-3 space-y-3 border-t border-line pt-3 text-sm not-italic text-muted">
-              {storeContact.phone && <a href={dialLink(storeContact.phone)} className="flex w-fit items-center gap-2 hover:text-accent">
+              {storeContact.phones.filter(Boolean).map(phone => <a key={phone} href={dialLink(phone)} className="flex w-fit items-center gap-2 hover:text-accent">
                 <Phone size={16} aria-hidden="true" className="shrink-0 text-accent" />
-                <span dir="ltr">{storeContact.phone}</span>
-              </a>}
+                <span dir="ltr">{phone}</span>
+              </a>)}
               {storeContact.address && <p className="flex items-start gap-2 leading-7">
                 <MapPin size={16} aria-hidden="true" className="mt-1 shrink-0 text-accent" />
                 <span>{storeContact.address}</span>

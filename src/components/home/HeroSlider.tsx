@@ -43,7 +43,7 @@ export default function HeroSlider() {
           <Image key={slide.file} src={`/images/hero/${slide.file}.webp`}
             alt={slide.alt} fill priority={i === 0} aria-hidden={index !== i}
             sizes="(min-width: 1280px) 1216px, 100vw"
-            className={`object-contain transition-opacity duration-700 motion-reduce:transition-none ${index === i ? "opacity-100" : "opacity-0"}`}
+            className={`object-cover object-[center_35%] transition-opacity duration-700 motion-reduce:transition-none ${index === i ? "opacity-100" : "opacity-0"}`}
           />
         ))}
         <div className="absolute bottom-3 start-3 flex items-center rounded-full border border-line bg-header/95 px-1 text-content">
