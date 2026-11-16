@@ -19,10 +19,10 @@ export default function ProductCard({ product }: { product: Product }) {
 
   return (
     <article className="group relative isolate flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-panel text-content transition-colors hover:border-accent/70 focus-within:border-accent">
-      <div className="relative grid aspect-[1.85] place-items-center overflow-hidden bg-radial from-accent/15 via-panel to-header">
-        <span aria-hidden="true" className="absolute aspect-square h-4/5 rounded-full border border-accent/20" />
-        <Image src={product.image} alt="" width={320} height={240}
-          className="relative h-[83%] w-3/4 object-contain motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:-translate-y-1" />
+      <div className="relative h-52 shrink-0 bg-radial from-accent/15 via-panel to-header sm:h-60">
+        <Image src={product.image} alt="" fill
+          sizes="(min-width: 1280px) 400px, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          className="object-contain p-3 sm:p-4" />
       </div>
       <div className="flex flex-1 flex-col gap-4 border-t border-line p-4 sm:p-5">
         <h3 className="text-lg font-bold">
