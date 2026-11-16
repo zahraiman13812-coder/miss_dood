@@ -39,7 +39,7 @@ export default function Header() {
   const close = () => { setOpen(null); drawer.current?.close(); };
   const navLinks = pages.map(([href,label]) => <Link key={href} href={href} onClick={close} aria-current={path===href ? "page" : undefined}
     className="py-3 hover:text-accent aria-[current=page]:text-accent aria-[current=page]:underline underline-offset-8">{label}</Link>);
-  return <header ref={header} className="relative z-10 border-b border-line bg-header text-sm">
+  return <header ref={header} className="sticky top-0 z-50 shrink-0 border-b border-line bg-header text-sm">
     <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-8">
       <button className={action+" lg:hidden"} aria-label="باز کردن منو" onClick={()=>drawer.current?.showModal()}><Menu/></button>
       <Link href="/" onClick={close} aria-label="میس دود، صفحه اصلی"><Image src="/brand/miss-dood-logo.jpg" alt="MISS DOOD" width={112} height={112} priority className="size-20 object-contain lg:size-28"/></Link>
