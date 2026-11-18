@@ -5,3 +5,28 @@ button, summary { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 dialog { margin: 0; inset: 0 0 auto auto; width: min(24rem,100%); height: 100dvh; max-height: 100dvh; max-width: 100%; }
 dialog::backdrop { background: var(--color-overlay); }
+
+/* Keep intrinsic form controls and long user-entered content inside RTL grids. */
+main, section, article, aside, form, fieldset, label { min-inline-size: 0; }
+main { overflow-wrap: anywhere; }
+input, select, textarea { max-inline-size: 100%; min-inline-size: 0; }
+textarea { resize: vertical; }
+html { scroll-padding-block-start: 7.5rem; }
+dialog[open] { overflow-y: auto; overscroll-behavior: contain; padding-block-end: max(1.25rem, env(safe-area-inset-bottom)); }
+body:has(dialog[open]) { overflow: hidden; }
+@media (max-width: 40rem) {
+  html { scroll-padding-block-start: 4.5rem; }
+  input:not([type="checkbox"]), select, textarea { font-size: 1rem; }
+  input[type="file"] { white-space: normal; }
+}
+@media (max-height: 34rem) and (orientation: landscape) {
+  body > div > header, main aside { position: static; }
+}
+
+/* Robust responsive defaults, including RTL layouts and very narrow devices. */
+html { min-width: 280px; }
+body { overflow-x: clip; }
+img, svg, video { max-width: 100%; }
+@media (prefers-reduced-motion: reduce) {
+ *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

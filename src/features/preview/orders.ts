@@ -1,16 +1,23 @@
+import { readStore, updateStore, type ShippingRule } from "../store/store";
+export const statuses = { received: "ثبت شده", packing: "در حال آماده‌سازی", sent: "ارسال شده" } as const;
+export type OrderStatus = keyof typeof statuses;
 export type PreviewOrder = {
   id: string;
   date: string;
+  shipping?: ShippingRule;
+  subtotal?: number;
+  status?: OrderStatus;
   total: number;
   items: { name: string; quantity: number; amount: number }[];
 };
-const key = "miss-dood.preview-orders.v1";
-export function readPreviews(): PreviewOrder[] {
-  try {
-    const values: unknown = JSON.parse(sessionStorage.getItem(key) || "[]");
-    return Array.isArray(values) ? values.filter(o => o && typeof o.id === "string" && Array.isArray(o.items) && Number.isFinite(o.total)) : [];
-  } catch { return []; }
-}
+export function readPreviews(): PreviewOrder[] { return readStore().orders; }
 export function savePreview(order: PreviewOrder) {
-  sessionStorage.setItem(key, JSON.stringify([order, ...readPreviews()].slice(0, 20)));
+  updateStore(s=>({...s,orders:[order,...s.orders].slice(0,20)}));
+}
+export function changePreviewStatus(id:string,status:OrderStatus) {
+  updateStore(s=>{
+    if (!s.orders.some(o=>o.id === id)) throw new Error("Order unavailable");
+    return {...s,orders:s.orders.map(o=>o.id===id ? {...o,status} : o)};
+  });
+  return readPreviews();
 }

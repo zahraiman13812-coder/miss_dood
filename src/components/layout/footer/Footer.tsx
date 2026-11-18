@@ -17,6 +17,7 @@ export default function Footer() {
           <Link href="/shop" className={linkStyle}>فروشگاه</Link>
           <Link href="/decor" className={linkStyle}>کاتالوگ تزئینی</Link>
           <Link href="/cart" className={linkStyle}>سبد خرید</Link>
+          <Link href="/help" className={linkStyle}>راهنمای خرید و پرسش‌های متداول</Link>
         </nav>
         <div className="min-w-0">
           <h2 className="mb-2 font-bold text-accent">ارتباط با میس دود</h2>

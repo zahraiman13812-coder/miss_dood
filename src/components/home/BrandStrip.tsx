@@ -4,11 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
+import { useStore } from "@/features/store/useStore";
 import { brands } from "@/data/brands";
 
 const control = "grid size-11 place-items-center rounded-full border border-line text-accent hover:bg-panel";
 
 export default function BrandStrip() {
+  const {products}=useStore();
   const list = useRef<HTMLUListElement>(null);
   function scroll(direction: number) {
     const rail = list.current;
@@ -31,16 +33,21 @@ export default function BrandStrip() {
       <ul ref={list} className="flex snap-x snap-mandatory gap-3 overflow-x-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {brands.map(brand => (
           <li key={brand.slug} className="w-28 shrink-0 snap-start sm:w-36">
-            <Link href={{pathname:"/shop", query:{brand:brand.slug}}} className="group block rounded-2xl border border-line bg-panel p-2 hover:border-accent">
+            <BrandTile slug={brand.slug} active={products.some(p=>p.brand===brand.slug)} className="group block rounded-2xl border border-line bg-panel p-2 hover:border-accent">
               <span className="grid h-20 place-items-center rounded-xl bg-content sm:h-24">
                 <Image src={`/images/brands/${brand.slug}.webp`} alt="" width={100} height={80}
                   className="h-[78%] w-[80%] object-contain motion-safe:transition-transform motion-safe:group-hover:scale-105"/>
               </span>
               <bdi className="mt-2 block truncate text-center text-sm font-semibold text-content">{brand.name}</bdi>
-            </Link>
+            </BrandTile>
           </li>
         ))}
       </ul>
     </section>
   );
+}
+
+function BrandTile({slug,active,className,children}:{slug:string;active:boolean;className:string;children:React.ReactNode}) {
+  return active ? <Link href={{pathname:"/shop",query:{brand:slug}}} className={className}>{children}</Link> :
+    <span title="کالایی از این برند ثبت نشده است" className={className+" opacity-60"}>{children}</span>;
 }

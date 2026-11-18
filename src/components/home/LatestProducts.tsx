@@ -3,9 +3,11 @@
 import ProductCard from "@/features/catalog/ProductCard";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { latestProducts } from "@/data/mock/latestProducts";
+import { useStore, refreshCatalog } from "@/features/store/useStore";
+
 
 export default function LatestProducts() {
+  const {products:latestProducts,catalogStatus}=useStore();
   const track = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
@@ -53,6 +55,8 @@ export default function LatestProducts() {
         <h2 id="latest-title" className="text-xl font-bold sm:text-2xl">تازه‌های میس دود</h2>
         <Link href="/shop" className="text-sm text-accent hover:underline">مشاهده همه</Link>
       </div>
+      {catalogStatus === "loading" && <p role="status" className="mb-3 rounded-xl bg-panel p-4 text-sm text-muted">در حال بارگذاری تازه‌ترین محصولات…</p>}
+      {catalogStatus === "error" && <div role="alert" className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-panel p-4 text-sm"><span>دریافت محصولات به‌روز ممکن نشد.</span><button type="button" className="min-h-11 rounded-xl border border-line px-4 text-accent" onClick={()=>void refreshCatalog(true)}>تلاش مجدد</button></div>}
       <ul ref={track} className="flex snap-x snap-mandatory gap-4 overflow-x-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {latestProducts.map(p => (
           <li key={p.slug} className="w-[83%] shrink-0 snap-start sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]">

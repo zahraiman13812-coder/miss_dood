@@ -1,0 +1,15 @@
+import assert from "node:assert/strict";
+import { readFileSync, existsSync } from "node:fs";
+const get = p => readFileSync(p, "utf8");
+const catalog = get("src/features/store/store.ts");
+assert.match(catalog, /products:\[\], stock:\{\}, shipping:\[\]/, "No fabricated catalog when database unavailable");
+const checkout = get("src/app/(store)/checkout/page.tsx");
+assert.match(checkout, /requestId\.current=null/, "Editing checkout must reset idempotency key");
+assert.match(checkout, /catalogStatus !== "ready"/, "Checkout must wait for real inventory");
+const orders = get("src/app/api/orders/route.ts");
+assert.match(orders, /FOR UPDATE/, "Product inventory must be locked in transactions");
+assert.match(orders, /idempotency-key/, "Order requests must use idempotency key");
+const admin = get("src/app/api/admin/route.ts");
+assert.match(admin, /await admin\(\)/, "Admin authorization required");
+for (const f of ["db/001_init.sql","db/002_safety.sql","src/app/(store)/help/page.tsx","src/features/store/useStore.ts"]) assert.ok(existsSync(f), `Missing ${f}`);
+console.log("Source smoke checks passed");

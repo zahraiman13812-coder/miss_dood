@@ -1,0 +1,21 @@
+# Example only: edit User, WorkingDirectory and ExecStart paths before use.
+# Copy to /etc/systemd/system/missdood.service and run daemon-reload / enable.
+[Unit]
+Description=MISS DOOD Next.js store
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/miss-dood
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOSTNAME=127.0.0.1
+ExecStart=/usr/bin/npm run start
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

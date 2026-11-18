@@ -43,13 +43,13 @@ export default function Header() {
   const navLinks = [...pages, ["/orders", "پیگیری سفارش"]].map(([href,label]) => <Link key={href} href={href} onClick={close} aria-current={path===href ? "page" : undefined}
     className="py-3 hover:text-accent aria-[current=page]:text-accent aria-[current=page]:underline underline-offset-8">{label}</Link>);
   return <header ref={header} className="sticky top-0 z-50 shrink-0 border-b border-line bg-header text-sm">
-    <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-8">
-      <button className={action+" lg:hidden"} aria-label="باز کردن منو" onClick={()=>drawer.current?.showModal()}><Menu/></button>
-      <Link href="/" onClick={close} aria-label="میس دود، صفحه اصلی"><Image src="/brand/miss-dood-logo.jpg" alt="MISS DOOD" width={112} height={112} priority className="size-20 object-contain lg:size-28"/></Link>
+    <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-2 lg:flex lg:justify-between lg:gap-4 px-4 sm:px-8">
+      <button className={action+" justify-self-start lg:hidden"} aria-label="باز کردن منو" onClick={()=>{if(!drawer.current?.open)drawer.current?.showModal();}}><Menu/></button>
+      <Link href="/" onClick={close} aria-label="میس دود، صفحه اصلی"><Image src="/brand/miss-dood-logo.jpg" alt="MISS DOOD" width={112} height={112} priority className="size-16 object-contain sm:size-20 lg:size-28"/></Link>
       <nav aria-label="منوی اصلی" className="hidden items-center gap-4 xl:gap-7 lg:flex">
         <div className="relative"><button ref={categoryButton} aria-expanded={open==="categories"} onClick={()=>setOpen(open==="categories"?null:"categories")} className={action+" px-3 text-accent"}><Grid2X2 size={17}/>دسته‌بندی کالا<ChevronDown size={15}/></button>
         {open==="categories" && <div className="absolute right-0 top-full mt-2 w-80 rounded-lg border border-line bg-panel p-3"><CategoryLinks close={close}/></div>}</div>{navLinks}</nav>
-      <div className="flex items-center gap-2 lg:ms-auto">
+      <div className="flex items-center justify-self-end gap-2 lg:ms-auto">
         <div className="relative hidden lg:block"><button ref={searchButton} aria-label="جست‌وجو" aria-expanded={open==="search"} className={action} onClick={()=>setOpen(open==="search"?null:"search")}><Search size={21}/></button>
         {open==="search" && <div className="absolute left-0 top-full mt-2 w-80 rounded-md border border-line bg-panel p-2"><SearchForm focus/></div>}</div>
         <Link href={signedIn ? "/account" : "/login"} onClick={close} className={action+" hidden px-3 lg:inline-flex"}><UserRound size={19}/>{accountLabel}</Link>

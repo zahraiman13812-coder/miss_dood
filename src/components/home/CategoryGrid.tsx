@@ -10,7 +10,7 @@ export default function CategoryGrid() {
         <h2 id="category-heading" className="text-xl font-bold text-content sm:text-2xl">دسته‌بندی کالاها</h2>
         <span aria-hidden="true" className="h-px flex-1 bg-line" />
       </div>
-      <ul className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
         {categories.map(([slug, label]) => (
           <li key={slug}>
             <Link href={{ pathname: "/shop", query: { category: slug } }}

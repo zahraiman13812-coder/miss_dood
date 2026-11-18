@@ -1,22 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { MapPin, PackageSearch } from "lucide-react";
+import SupportDesk from "@/features/support/SupportDesk";
 import { dialLink, storeContact } from "@/data/storeContact";
 
 export default function ContactPage() {
-  const [message,setMessage] = useState("");
-  const [preview,setPreview] = useState(false);
-  return <main className="mx-auto w-full max-w-3xl space-y-6 px-5 py-12">
+  return <main className="mx-auto w-full max-w-6xl space-y-5 px-4 py-6 sm:px-8 lg:py-10">
     <h1 className="text-3xl font-bold">تماس با میس دود</h1>
+    <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]"><aside className="space-y-3">
     <div className="space-y-2 rounded-2xl border border-line bg-panel p-6">
-      <h2 className="font-bold text-accent">نشانی فروشگاه</h2>
+      <h2 className="font-bold text-accent"><MapPin size={18} className="me-2 inline"/>نشانی فروشگاه</h2>
       <address className="not-italic leading-8">{storeContact.address}</address>
       {storeContact.phones.filter(Boolean).map(phone => <a key={phone} href={dialLink(phone)} className="block text-accent"><bdi>{phone}</bdi></a>)}
     </div>
-    <form className="space-y-4" onSubmit={e=>{e.preventDefault();setPreview(true);}}>
-      <label className="block">پیام شما<textarea required minLength={5} maxLength={2000} rows={4} value={message} onChange={e=>{setMessage(e.target.value);setPreview(false);}} className="mt-2 block w-full rounded-xl border border-line bg-panel p-4"/></label>
-      <button className="rounded-xl bg-accent px-5 py-3 text-on-accent">پیش‌نمایش پیام</button>
-    </form>
-    {preview && <section aria-live="polite" className="space-y-2 rounded-xl border border-line p-4"><h2 className="font-bold">پیش‌نمایش پیام</h2><p className="whitespace-pre-wrap break-words">{message}</p><p className="text-sm text-muted">این پیام برای فروشگاه ارسال نشده است.</p></section>}
+    <Link href="/orders" className="flex items-center gap-4 rounded-2xl border border-line bg-panel p-5 hover:border-accent"><PackageSearch className="text-accent"/><div><strong>پیگیری سفارش</strong><p className="mt-1 text-sm text-muted">مشاهده رسید و جست‌وجو با شناسه سفارش</p></div></Link>
+    </aside><SupportDesk/></div>
   </main>;
 }
